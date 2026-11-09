@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sagarchive.github.io/ArcVolume/sitemap.xml

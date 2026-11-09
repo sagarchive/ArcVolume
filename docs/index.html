@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ArcVolume: Fix Low HDMI ARC Soundbar Volume on Android TV</title>
+<meta name="description" content="Soundbar too quiet on HDMI ARC? ArcVolume sets your soundbar or home theatre volume every time your Android TV starts. Free, no root, no internet access.">
+<link rel="canonical" href="https://sagarchive.github.io/ArcVolume/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ArcVolume: Fix Low HDMI ARC Soundbar Volume">
+<meta property="og:description" content="Sets your soundbar volume every time your Android TV starts. Free, no root.">
+<meta property="og:url" content="https://sagarchive.github.io/ArcVolume/">
+<meta property="og:image" content="https://sagarchive.github.io/ArcVolume/banner.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "ArcVolume", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Android TV 7.0 or newer", "description": "Fixes a quiet HDMI ARC soundbar or home theatre by setting its volume every time an Android TV starts.", "url": "https://sagarchive.github.io/ArcVolume/", "downloadUrl": "https://github.com/sagarchive/ArcVolume/releases/latest/download/ArcVolume.apk", "softwareVersion": "1.0", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Why is my soundbar so quiet after turning on the TV?", "acceptedAnswer": {"@type": "Answer", "text": "Many HDMI ARC soundbars forget their volume when they lose power and come back at a lower level, even though the TV shows full volume. ArcVolume sets it back each time the TV starts."}}, {"@type": "Question", "name": "How do I increase the volume of a soundbar connected by HDMI ARC?", "acceptedAnswer": {"@type": "Answer", "text": "Turn on HDMI-CEC, then use the soundbar's own volume or remote. To have it set automatically at every start on Android TV, install ArcVolume and open it once."}}, {"@type": "Question", "name": "Does ArcVolume need root or internet access?", "acceptedAnswer": {"@type": "Answer", "text": "No. It has no internet permission and does not need root."}}]}</script>
+<link rel="icon" href="icon.png">
+<style>
+:root {
+  --bg: #ffffff; --surface: #f5f5f7; --text: #1d1d1f; --muted: #6e6e73; --line: #d2d2d7;
+  --accent: #0a66d6; --accent-text: #ffffff; --tv: #101114; --shadow: 0 24px 60px rgba(0,0,0,.18);
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000; --surface: #1c1c1e; --text: #f5f5f7; --muted: #a1a1a6; --line: #38383a;
+    --accent: #4a9dff; --accent-text: #00152e; --shadow: 0 24px 60px rgba(0,0,0,.7);
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--bg); color: var(--text); line-height: 1.5;
+  font: 17px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", Roboto, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+a { color: var(--accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+header { position: sticky; top: 0; z-index: 2; background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--line); }
+nav { display: flex; align-items: center; justify-content: space-between; height: 52px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--text); text-decoration: none; }
+.brand img { border-radius: 7px; }
+nav ul { display: flex; gap: 24px; list-style: none; margin: 0; padding: 0; font-size: 14px; }
+nav ul a { color: var(--muted); text-decoration: none; }
+nav ul a:hover { color: var(--text); }
+.hero { text-align: center; padding: 88px 0 24px; }
+h1 { font-size: clamp(42px, 8vw, 76px); line-height: 1.06; letter-spacing: -.025em; margin: 0 0 18px; font-weight: 700; }
+.lead { font-size: clamp(19px, 2.6vw, 24px); color: var(--muted); max-width: 640px; margin: 0 auto 32px; line-height: 1.35; }
+.btn { display: inline-block; background: var(--accent); color: var(--accent-text); font-weight: 600;
+  text-decoration: none; padding: 14px 30px; border-radius: 999px; transition: transform .15s ease; }
+.btn:hover { transform: scale(1.03); }
+.meta { color: var(--muted); font-size: 14px; margin: 14px 0 0; }
+.tv { max-width: 780px; margin: 56px auto 0; padding: 12px 12px 14px; background: var(--tv); border-radius: 16px; box-shadow: var(--shadow); }
+.tv img { display: block; width: 100%; height: auto; border-radius: 6px; }
+section { padding: 72px 0 0; }
+h2 { font-size: clamp(30px, 5vw, 44px); letter-spacing: -.02em; line-height: 1.1; margin: 0 0 12px; }
+.sub { color: var(--muted); font-size: 19px; margin: 0 0 32px; max-width: 620px; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.card { background: var(--surface); border-radius: 20px; padding: 26px; }
+.card h3 { margin: 0 0 8px; font-size: 20px; letter-spacing: -.01em; }
+.card p { margin: 0; color: var(--muted); }
+ol.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 44px 1fr; gap: 16px; padding: 20px 0; border-top: 1px solid var(--line); }
+ol.steps li::before { content: counter(s); width: 40px; height: 40px; border-radius: 50%; background: var(--surface);
+  display: grid; place-items: center; font-weight: 600; color: var(--accent); }
+ol.steps h3 { margin: 6px 0 4px; font-size: 19px; letter-spacing: -.01em; }
+ol.steps p { margin: 0; color: var(--muted); }
+code { font: 14px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--surface); padding: 16px 18px; border-radius: 12px; overflow-x: auto; margin: 12px 0 0; }
+details { border-top: 1px solid var(--line); padding: 18px 0; }
+summary { cursor: pointer; font-weight: 600; font-size: 18px; }
+details p { color: var(--muted); margin: 10px 0 0; }
+.note { background: var(--surface); border-radius: 16px; padding: 20px 24px; color: var(--muted); }
+.note strong { color: var(--text); }
+footer { margin-top: 88px; padding: 28px 0 44px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+footer p { margin: 0 0 6px; }
+@media (max-width: 720px) {
+  .cards { grid-template-columns: 1fr; }
+  .hero { padding-top: 56px; }
+  nav ul { gap: 16px; }
+  .hide-sm { display: none; }
+}
+</style>
+</head>
+<body>
+<header>
+  <nav class="wrap" aria-label="Main">
+    <a class="brand" href="#top"><img src="icon.png" width="28" height="28" alt="">ArcVolume</a>
+    <ul>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#install">Install</a></li>
+      <li class="hide-sm"><a href="#faq">Questions</a></li>
+      <li><a href="https://github.com/sagarchive/ArcVolume/issues">Report a problem</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="top" class="wrap">
+  <div class="hero">
+    <h1>Full volume.<br>Every time.</h1>
+    <p class="lead">Soundbar too quiet on HDMI ARC? Many soundbars and home theatres forget their volume when the power goes off. ArcVolume sets yours back each time your Android TV starts.</p>
+    <a class="btn" href="https://github.com/sagarchive/ArcVolume/releases/latest/download/ArcVolume.apk">Download for Android TV</a>
+    <p class="meta">Version 1.0 · 37 KB · Android TV 7 or newer · Free</p>
+    <div class="tv"><img src="app-screen.png" width="1280" height="720" alt="The ArcVolume settings screen on a TV, with an on and off switch, a start volume bar, and setup status."></div>
+  </div>
+
+  <section id="problem">
+    <h2>Low volume over HDMI ARC?</h2>
+    <p class="sub">The TV shows full volume, but the sound is still low. Many HDMI ARC soundbars and home theatres go back to a lower level after a power cut or a main-switch restart, and raising the TV's volume can't fix it. ArcVolume raises the soundbar itself, using HDMI-CEC.</p>
+  </section>
+
+  <section id="how">
+    <h2>It just turns it back up.</h2>
+    <p class="sub">There's nothing to run or remember once it's set up.</p>
+    <div class="cards">
+      <div class="card"><h3>Waits for the soundbar</h3><p>At startup it waits for the HDMI ARC connection and reads the soundbar's real level.</p></div>
+      <div class="card"><h3>Sets your level</h3><p>Full volume by default, or any level from 10% to 100%. You can also turn it off.</p></div>
+      <div class="card"><h3>Keeps to itself</h3><p>It has no internet permission, so it can't send anything anywhere. No root needed.</p></div>
+    </div>
+  </section>
+
+  <section id="install">
+    <h2>Set it up once.</h2>
+    <p class="sub">Menu names differ a little between TV brands.</p>
+    <ol class="steps">
+      <li><div><h3>Connect the soundbar</h3><p>Use the HDMI port on your TV labelled ARC or eARC.</p></div></li>
+      <li><div><h3>Turn on HDMI-CEC</h3><p>On the TV and the soundbar. Some brands call it Anynet+, Bravia Sync or SimpLink. Your TV remote should now change the soundbar's volume.</p></div></li>
+      <li><div><h3>Allow the app to install</h3><p>On the TV, open Settings, then Device Preferences, then Security &amp; restrictions. Under Unknown sources, allow your file manager.</p></div></li>
+      <li><div><h3>Copy the app to a USB drive</h3><p><a href="https://github.com/sagarchive/ArcVolume/releases/latest/download/ArcVolume.apk">Download ArcVolume.apk</a> on a computer, copy it to a USB drive, and plug the drive into your TV.</p></div></li>
+      <li><div><h3>Install it</h3><p>Open the USB drive in your TV's file manager, select ArcVolume.apk and choose Install.</p></div></li>
+      <li><div><h3>Open ArcVolume once</h3><p>Find it in your apps and open it. It's already on and set to 100%. Android won't start a new app by itself until it has been opened, so this one time is needed.</p></div></li>
+      <li><div><h3>Restart your TV</h3><p>The volume should rise by itself soon after the picture appears.</p></div></li>
+    </ol>
+    <details>
+      <summary>Prefer a computer? Install with adb</summary>
+      <p>Turn on USB debugging in the TV's Developer options, then run these. Use your TV's IP address.</p>
+      <pre><code>adb connect YOUR_TV_IP:5555
+adb install ArcVolume.apk</code></pre>
+      <p>Then open ArcVolume once on the TV.</p>
+    </details>
+  </section>
+
+  <section id="faq">
+    <h2>Questions.</h2>
+    <details><summary>Will it be very loud?</summary><p>It starts at 100% until you change it. To pick a lower level, open ArcVolume and use the left and right buttons on your remote on Start volume. The soundbar moves to that level and plays a short sound, so you can hear it.</p></details>
+    <details><summary>Can I turn it off?</summary><p>Yes. Open ArcVolume and switch Set volume at start to Off. Your soundbar's volume will then be left alone.</p></details>
+    <details><summary>Do I need to open it every time?</summary><p>No. Open it once after installing. After that it runs by itself at every TV start.</p></details>
+    <details><summary>Does it work with my TV and soundbar?</summary><p>It's been tested on a Xiaomi Mi TV with Android 9 and a boAt Aavante HA0304 soundbar. Other Android TVs with working HDMI-CEC volume control should work, but they haven't been tested. If yours doesn't, please report it.</p></details>
+    <details><summary>The volume didn't rise. What should I check?</summary><p>Open ArcVolume. It shows whether HDMI ARC is connected and what happened on the last run. Make sure the TV remote can change the soundbar's volume, because the app uses that same path.</p></details>
+    <details><summary>How long does it take?</summary><p>On the tested TV it starts about 22 seconds after boot and finishes within about 15 seconds. You may hear the lower volume briefly because Android has to load first.</p></details>
+    <details><summary>Why does my TV warn me when installing?</summary><p>Android checks apps that come from outside the Play Store. If your TV asks, choose to install anyway. If you block it, the app will not install.</p></details>
+    <details><summary>Does it work when the TV wakes from sleep?</summary><p>It runs when the TV fully starts. Waking from sleep may not trigger it.</p></details>
+    <details><summary>How do I remove it?</summary><p>Uninstall it from your TV's Apps settings like any other app.</p></details>
+  </section>
+
+  <section>
+    <div class="note"><strong>Free to install and use.</strong> Please don't sell it, repackage it, or publish it as your own. See the <a href="https://github.com/sagarchive/ArcVolume/blob/main/LICENSE">licence</a>.</div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>ArcVolume is an independent project. It isn't affiliated with any TV or soundbar maker.</p>
+    <p><a href="https://github.com/sagarchive/ArcVolume/issues">Report a problem</a> · <a href="https://github.com/sagarchive/ArcVolume/releases">All versions</a></p>
+  </div>
+</footer>
+</body>
+</html>
